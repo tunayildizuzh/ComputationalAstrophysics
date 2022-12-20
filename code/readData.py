@@ -17,5 +17,8 @@ class Particle():
         self.pos = np.array((self.x, self.y, self.z))
         self.radius = np.linalg.norm(self.pos)
         self.radius2 = np.linalg.norm(self.pos, ord = 2) ** 2
+        self.force = 0
+
+
 
 

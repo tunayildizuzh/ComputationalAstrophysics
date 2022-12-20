@@ -7,6 +7,7 @@ particles = np.genfromtxt("/Users/tunayildiz/Desktop/UZH/ComputationalAstrophysi
 Particle_list = [Particle(i,m,x,y,z,vx,vy,vz,softening,potential) for i,m,x,y,z,vx,vy,vz,softening,potential in particles]
 radius_max = int(max([i.radius for i in Particle_list])) + 1
 
+
 def total_mass():
     mass = 0
     for i in Particle_list:
@@ -16,12 +17,13 @@ def total_mass():
 
 def Mass(r):  # Total mass in a given radius r.
     mass = 0
-    mass_values = []
+    count = 0
     for particle in Particle_list:
         if r >= particle.radius:
             mass += particle.mass
+            count += 1
 
-    return mass
+    return mass, count
 
 
 def bin_mass(r, bin_size):
@@ -31,7 +33,9 @@ def bin_mass(r, bin_size):
         if particle.radius >= r and particle.radius <= r + bin_size:
             mass += particle.mass
 
-    return mass
+    count = mass / Particle_list[0].mass # Every particle has the same mass.
+    return mass, count
+
 
 def volume(r,bin_size):
 
@@ -42,12 +46,13 @@ def half_mass(): # half mass radius = 0.188
     half = total_mass() / 2
     val = 0
     for i in np.arange(0, radius_max,0.001):
-        if Mass(i) >= half:
+        if Mass(i)[0] >= half:
             val = i
             break
     return val
 
 
+softening = Mass(half_mass())[1]
 scale_length = half_mass() / (1+math.sqrt(2))
 
 
@@ -59,20 +64,47 @@ def hernquist_density(r): # Hernquist Paper Equation 2.
 hernquist_vals = []
 mass_vals = []
 radius_list = []
-
+particle_count = []
 
 for i in np.arange(0.01, radius_max,1):
     hernquist_vals.append(hernquist_density(i))
-    mass_vals.append(bin_mass(i,5)/volume(i,5))
+    mass_vals.append(bin_mass(i,5)[0]/volume(i,5))
+    particle_count.append(bin_mass(i, 5)[1])
 
+def compute_nbody_forces(G, epsilon):
+    forces = []
+    with open('nbody_forces1.txt', 'w') as output:  # Save it in text file.
+        for particle in Particle_list[0:10]:
+            r = 0
+            for particle2 in Particle_list:
+                r += particle2.mass / pow((pow(particle.radius - particle2.radius, 2) + pow(epsilon, 3)), (3 / 2)) * (
+                            particle.radius - particle2.radius)
 
-print(min(hernquist_vals))
-print(max(hernquist_vals))
+            output.write(str(-G*r) + '\n')
+        output.close()
 
+    return np.array(forces)
 
-plt.plot(mass_vals,color = 'orange')
-plt.show()
+def draw_figs():  # Plots
+    fig, (ax1,ax2,ax3) = plt.subplots(1,3, figsize =(15,6))
+    ax1.plot(mass_vals)
+    ax1.set_title('Mass Density Function')
+    ax1.set_xlabel('Radius')
+    ax1.set_ylabel('Mass Density')
 
+    ax2.plot(hernquist_vals)
+    ax2.set_title('Analytical Hernquist Density Function')
+    ax2.set_xlabel('Radius')
+    ax2.set_ylabel('Hernquist Density')
+
+    ax3.plot(particle_count)
+    ax3.set_title('Particle Count')
+    ax3.set_xlabel('Radius')
+    ax3.set_ylabel('Particle Count')
+    plt.savefig('HernquistvsMassDensityFunction.png')
+    plt.show()
+
+compute_nbody_forces(1, softening)
 
 
 

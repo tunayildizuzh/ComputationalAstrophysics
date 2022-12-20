@@ -52,7 +52,7 @@ def half_mass(): # half mass radius = 0.188
     return val
 
 
-softening = Mass(half_mass())[1]
+softening = Mass(half_mass()/2)[1]
 scale_length = half_mass() / (1+math.sqrt(2))
 
 
@@ -72,9 +72,14 @@ for i in np.arange(0.01, radius_max,1):
     particle_count.append(bin_mass(i, 5)[1])
 
 def compute_nbody_forces(G, epsilon):
+    print('Computing N-body Forces')
     forces = []
-    with open('nbody_forces1.txt', 'w') as output:  # Save it in text file.
-        for particle in Particle_list[0:10]:
+    i = 0
+    with open('nbody_forces0.5.txt', 'w') as output:  # Save it in text file.
+        for particle in Particle_list:
+            i += 1
+            if i % 1000 == 0:
+                print(i)
             r = 0
             for particle2 in Particle_list:
                 r += particle2.mass / pow((pow(particle.radius - particle2.radius, 2) + pow(epsilon, 3)), (3 / 2)) * (
@@ -84,6 +89,10 @@ def compute_nbody_forces(G, epsilon):
         output.close()
 
     return np.array(forces)
+
+# def analytical_force(r):
+#
+
 
 def draw_figs():  # Plots
     fig, (ax1,ax2,ax3) = plt.subplots(1,3, figsize =(15,6))

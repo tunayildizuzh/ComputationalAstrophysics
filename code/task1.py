@@ -7,6 +7,10 @@ particles = np.genfromtxt("/Users/tunayildiz/Desktop/UZH/ComputationalAstrophysi
 Particle_list = [Particle(i,m,x,y,z,vx,vy,vz,softening,potential) for i,m,x,y,z,vx,vy,vz,softening,potential in particles]
 radius_max = int(max([i.radius for i in Particle_list])) + 1
 
+force_100 = np.genfromtxt('/Users/tunayildiz/Desktop/UZH/ComputationalAstrophysics/Data/nbody_forces100.txt', delimiter ='\t', dtype = float)
+force_half = np.genfromtxt('/Users/tunayildiz/Desktop/UZH/ComputationalAstrophysics/Data/nbody_forces0.5.txt',delimiter = '\t', dtype = float)
+force_rhm = np.hsplit(np.genfromtxt('/Users/tunayildiz/Desktop/UZH/ComputationalAstrophysics/Data/nbody_forces_rhm.txt',delimiter = '\t', dtype = float),2)[1]
+particle_radius = [i.radius for i in Particle_list]
 
 def total_mass():
     mass = 0
@@ -90,30 +94,62 @@ def compute_nbody_forces(G, epsilon):
 
     return np.array(forces)
 
-# def analytical_force(r):
-#
+def analytical_force(G):
+    force_analytic = []
+    for i in np.arange(0.01, radius_max/350,1):
+        force_analytic.append(((-G) * Mass(i)[0]) / pow(i, 3))
+
+    return force_analytic
 
 
-def draw_figs():  # Plots
-    fig, (ax1,ax2,ax3) = plt.subplots(1,3, figsize =(15,6))
-    ax1.plot(mass_vals)
-    ax1.set_title('Mass Density Function')
-    ax1.set_xlabel('Radius')
-    ax1.set_ylabel('Mass Density')
+def draw_figs(number):  # Plots
+    if number == 1:
+        fig, (ax1,ax2,ax3) = plt.subplots(1,3, figsize =(15,6))
+        ax1.plot(mass_vals)
+        ax1.set_title('Mass Density Function')
+        ax1.set_xlabel('Radius')
+        ax1.set_ylabel('Mass Density')
 
-    ax2.plot(hernquist_vals)
-    ax2.set_title('Analytical Hernquist Density Function')
-    ax2.set_xlabel('Radius')
-    ax2.set_ylabel('Hernquist Density')
+        ax2.plot(hernquist_vals)
+        ax2.set_title('Analytical Hernquist Density Function')
+        ax2.set_xlabel('Radius')
+        ax2.set_ylabel('Hernquist Density')
 
-    ax3.plot(particle_count)
-    ax3.set_title('Particle Count')
-    ax3.set_xlabel('Radius')
-    ax3.set_ylabel('Particle Count')
-    plt.savefig('HernquistvsMassDensityFunction.png')
-    plt.show()
+        ax3.plot(particle_count)
+        ax3.set_title('Particle Count')
+        ax3.set_xlabel('Radius')
+        ax3.set_ylabel('Particle Count')
+        plt.savefig('HernquistvsMassDensityFunction.png')
+        plt.show()
 
-compute_nbody_forces(1, softening)
+    if number == 2:
+        fig, (ax1,ax2,ax3) = plt.subplots(1,3, figsize = (12,8))
+        ax1.plot(particle_radius,force_100, label = 'softening = 100', color = 'blue')
+        ax2.plot(force_rhm, label='softening = rhm', color='orange')
+        ax3.plot(particle_radius,force_half, label = 'softening = rhm/2', color = 'green')
+
+        for i in ax1,ax3:
+            i.set_xlabel('Particle Index')
+            i.set_ylabel('Force')
+        ax1.legend()
+        ax2.legend()
+        ax3.legend()
+        plt.savefig('ForcevsSoftening.png')
+        plt.show()
+
+    if number == 3:
+        plt.plot(analytical_force(1))
+        plt.show()
+
+
+
+
+
+
+# compute_nbody_forces(1, softening)
+draw_figs(3)
+
+
 
 
 

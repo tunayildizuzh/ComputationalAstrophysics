@@ -96,10 +96,18 @@ def compute_nbody_forces(G, epsilon):
 
 def analytical_force(G):
     force_analytic = []
-    for i in np.arange(0.01, radius_max/350,1):
+    for i in np.arange(0.01, radius_max,1):
         force_analytic.append(((-G) * Mass(i)[0]) / pow(i, 3))
 
     return force_analytic
+
+def compute_relaxation():
+    G = 1
+    N = len(Particle_list)
+    vc = math.sqrt((G * total_mass()/2) / half_mass()) #  M(Rhm) = total_mass() / 2
+    t_cross = half_mass() / vc
+    t_relax = (N / (8 * np.log(N))) * t_cross
+
 
 
 def draw_figs(number):  # Plots
@@ -124,12 +132,12 @@ def draw_figs(number):  # Plots
 
     if number == 2:
         fig, (ax1,ax2,ax3) = plt.subplots(1,3, figsize = (12,8))
-        ax1.plot(particle_radius,force_100, label = 'softening = 100', color = 'blue')
-        ax2.plot(force_rhm, label='softening = rhm', color='orange')
-        ax3.plot(particle_radius,force_half, label = 'softening = rhm/2', color = 'green')
-
+        ax1.plot(sorted(particle_radius),force_100, label = 'softening = Mass(100)', color = 'blue')
+        ax2.plot(force_rhm, label='softening = Mass(rhm)', color='orange')
+        ax3.plot(sorted(particle_radius),force_half, label = 'softening = Mass(rhm/2)', color = 'green')
+        ax2.set_xlabel('Particle Index')
         for i in ax1,ax3:
-            i.set_xlabel('Particle Index')
+            i.set_xlabel('Radius')
             i.set_ylabel('Force')
         ax1.legend()
         ax2.legend()
@@ -139,6 +147,10 @@ def draw_figs(number):  # Plots
 
     if number == 3:
         plt.plot(analytical_force(1))
+        plt.xlabel('Radius')
+        plt.ylabel('Force')
+        plt.title('Analytical Force')
+        plt.savefig('AnalyticalForce.png')
         plt.show()
 
 
@@ -147,7 +159,7 @@ def draw_figs(number):  # Plots
 
 
 # compute_nbody_forces(1, softening)
-draw_figs(3)
+# draw_figs(2)
 
 
 

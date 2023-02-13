@@ -9,9 +9,11 @@ class Particle():
         self.x = x
         self.y = y
         self.z = z
+        self.position = np.array((self.x,self.y,self.z))
         self.vx = vx
         self.vy = vy
         self.vz = vz
+        self.velocity = np.array((self.vx, self.vy, self.vz))
         self.softening = softening
         self.potential = potential
         self.pos = np.array((self.x, self.y, self.z))

@@ -1,6 +1,8 @@
 import numpy as np
 from readData import Particle
 import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
 
 particles = np.genfromtxt("/Users/tunayildiz/Desktop/UZH/ComputationalAstrophysics/Data/data1.txt", delimiter="\t", dtype=float)[1:] # ID, mass, x, y, z, vx, vy, vz, softening, potential
 
@@ -20,7 +22,7 @@ particle_position_z = [i.pos[2] for i in Particle_list]
 
 class Mesh:
 
-    def __init__(self, x_min, x_max, y_min, y_max, square_count,Particle_list):
+    def __init__(self, x_min, x_max, y_min, y_max, square_count, Particle_list):
         self.x_min = x_min
         self.x_max = x_max
         self.y_min = y_min
@@ -30,54 +32,66 @@ class Mesh:
         self.h = self.length / self.square_count
         self.Particle_list = Particle_list
 
-    def square_coordinates(self):
-        square_coordinates = {}
-        y_min = 0
-        for idx_x, i in enumerate(np.arange(0,self.length,self.h)):
-            x_min = 0
-
-            for idx_y, j in enumerate(np.arange(0,self.length,self.h)):
-
-                square_coordinates[idx_x,idx_y] = [x_min, x_min + self.h, y_min, y_min + self.h]
-                x_min += self.h
-
-            y_min += self.h
-
-        return square_coordinates
 
     def insert_particle(self):
-        particle_list = []
-        particle_points = {}
-        square_coordinates = self.square_coordinates()
+        square_coor = {}
+        part_list = []
+        x_coor = np.arange(x_min,x_max+self.h,self.h)
+        y_coor = np.arange(y_min,y_max+self.h,self.h)
+        print(x_coor)
+        print(y_coor)
+        for i in range(len(x_coor)-1):
+
+            for j in range(len(y_coor)-1):
+                for particle in self.Particle_list:
+                    if x_coor[i] <= particle.pos[0] <= x_coor[i+1]:
+                        if y_coor[j] <= particle.pos[1] <= y_coor[j+1]:
+                            part_list.append(particle.index)
+
+                square_coor[round(x_coor[i],3),round(y_coor[j],3)] = part_list
+                part_list = []
+
+        return square_coor
+
+    def plot(self):
+        plt.scatter(particle_position_x, particle_position_y)
+        # plt.scatter(particle_position_x, particle_position_y)
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.title('Particle Distribution')
+        plt.show()
 
 
-        for key in square_coordinates:
-            for particle in self.Particle_list:
-                if square_coordinates[key][0] <= particle.pos[0] <= square_coordinates[key][1]:
-                    if square_coordinates[key][2] <= particle.pos[1] <= square_coordinates[key][3]:
-                        particle_list.append(particle.index)
 
-            particle_points[key] = particle_list
-            particle_list = []
+    def plot_histogram(self):
+        particle_dict = self.insert_particle()
 
-
-        return particle_points
-
-def plot():
-    fig = plt.figure()
-    ax = fig.add_subplot(projection='3d')
-    ax.scatter(particle_position_x,particle_position_y,particle_position_z)
-    # plt.scatter(particle_position_x, particle_position_y)
-    plt.xlabel('x')
-    plt.ylabel('y')
-    plt.title('Particle Distribution')
-    plt.show()
+        particle_key_list = list(particle_dict.keys())
+        print('YY')
+        print(len(particle_key_list))
+        data_matrix = np.array([len(particle_dict[i]) for i in particle_key_list])
+        data_matrix = data_matrix.reshape(self.square_count,self.square_count)
+        print(data_matrix)
+        print(data_matrix.shape)
 
 
-grid = Mesh(x_min,x_max,y_min,y_max,50,Particle_list)
-print(grid.insert_particle())
+        plt.imshow(data_matrix, cmap='viridis', extent=[x_min,x_max,y_min,y_max])
+        plt.title('Density Field')
+        plt.colorbar()
+        plt.show()
 
 
+
+
+
+
+
+
+
+grid = Mesh(x_min,x_max,y_min,y_max,100,Particle_list)
+grid.insert_particle()
+
+grid.plot_histogram()
 
 
 

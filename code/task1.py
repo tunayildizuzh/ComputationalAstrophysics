@@ -3,7 +3,7 @@ from readData import Particle
 import math
 import matplotlib.pyplot as plt
 
-particles = np.genfromtxt("/Users/tunayildiz/Desktop/UZH/ComputationalAstrophysics/Data/data_neww.txt", delimiter="\t", dtype=float) # ID, mass, x, y, z, vx, vy, vz, softening, potential
+particles = np.genfromtxt("/Users/tunayildiz/Desktop/UZH/ComputationalAstrophysics/Data/data_neww.txt", delimiter="\t", dtype=float)[0:500] # ID, mass, x, y, z, vx, vy, vz, softening, potential
 print(f'Number of particles: {len(particles)}')
 Particle_list = [Particle(i,m,x,y,z,vx,vy,vz,softening,potential) for i,m,x,y,z,vx,vy,vz,softening,potential in particles]
 radius_max = int(max([i.radius for i in Particle_list])) + 1
@@ -78,14 +78,14 @@ def compute_density_comparison():
     print('Hernquist Density and Mass Density calculation starts.')
     for i in np.arange(0.01, radius_max,1):
         hernquist_vals.append(hernquist_density(i))
-        mass_density_vals.append(bin_mass(i,5)[0]/volume(i,5))
-        particle_count.append(bin_mass(i, 5)[1])
+        mass_density_vals.append(bin_mass(i,10)[0]/volume(i,10))
+        particle_count.append(bin_mass(i, 10)[1])
     print('Hernquist Density and Mass Density calculation ended.')
 
     return hernquist_vals,mass_density_vals,particle_count
 
 
-densities = compute_density_comparison() # Hernquist, Mass, particle count
+# densities = compute_density_comparison() # Hernquist, Mass, particle count
 
 
 
@@ -118,13 +118,13 @@ def compute_nbody_forces2(G, epsilon,fname):
             output.write(str(-G*force_magnitude) + '\n')
         output.close()
 
-# compute_nbody_forces2(1,softening_mean_inter_sep, 'direct_nbody_forces_mis_new.txt')
-# compute_nbody_forces2(1,softening_mean_inter_sep*200,'direct_nbody_forces_mis2x_new.txt')
-# compute_nbody_forces2(1,softening_mean_inter_sep*400,'direct_nbody_forces_mis0.5x_new.txt')
-#
-# force_mis_new = np.genfromtxt('/Users/tunayildiz/Desktop/UZH/ComputationalAstrophysics/code/direct_nbody_forces_mis_new.txt',delimiter ='\t', dtype=float)
-# force_mis_new2 = np.genfromtxt('/Users/tunayildiz/Desktop/UZH/ComputationalAstrophysics/code/direct_nbody_forces_mis2x_new.txt',delimiter ='\t', dtype=float)
-# force_mis_new3 = np.genfromtxt('/Users/tunayildiz/Desktop/UZH/ComputationalAstrophysics/code/direct_nbody_forces_mis0.5x_new.txt',delimiter ='\t', dtype=float)
+compute_nbody_forces2(1,softening_mean_inter_sep, 'direct_nbody_forces_mis_new.txt')
+compute_nbody_forces2(1,softening_mean_inter_sep*200,'direct_nbody_forces_mis2x_new.txt')
+compute_nbody_forces2(1,softening_mean_inter_sep*600,'direct_nbody_forces_mis6x_new.txt')
+
+force_mis_new = np.genfromtxt('/Users/tunayildiz/Desktop/UZH/ComputationalAstrophysics/code/direct_nbody_forces_mis_new.txt',delimiter ='\t', dtype=float)
+force_mis_new2 = np.genfromtxt('/Users/tunayildiz/Desktop/UZH/ComputationalAstrophysics/code/direct_nbody_forces_mis2x_new.txt',delimiter ='\t', dtype=float)
+force_mis_new3 = np.genfromtxt('/Users/tunayildiz/Desktop/UZH/ComputationalAstrophysics/code/direct_nbody_forces_mis6x_new.txt',delimiter ='\t', dtype=float)
 
 
 
@@ -239,9 +239,9 @@ def draw_figs(number):  # Plots
         fig, (ax1,ax2,ax3) = plt.subplots(1,3, figsize = (12,8))
         # ax1.plot(sorted(particle_radius),np.log(force_100), label = 'softening = Mass(100)', color = 'blue')
         # ax1.scatter(particle_radius, np.log(force_mis_new), label='softening = Mass(rhm)', color='orange')
-        ax1.scatter(particle_radius[0:5000], np.log(force_mis_new*(-1)), label='softening = Mass(rhm)', color='orange')
-        ax2.scatter(particle_radius[0:5000], np.log(force_mis_new2*(-1)), label='softening = Mass(rhm)', color='orange')
-        ax3.scatter(particle_radius[0:5000], np.log(force_mis_new3*(-1)), label='softening = Mass(rhm)', color='orange')
+        ax1.scatter(particle_radius[0:500], np.log(force_mis_new*(-1)), label='softening = Mass(rhm)', color='orange')
+        ax2.scatter(particle_radius[0:500], np.log(force_mis_new2*(-1)), label='softening = Mass(rhm)*2', color='blue')
+        ax3.scatter(particle_radius[0:500], np.log(force_mis_new3*(-1)), label='softening = Mass(rhm)*6', color='green')
 
 
 
@@ -280,7 +280,7 @@ def draw_figs(number):  # Plots
 
 
 # compute_nbody_forces(1, softening_mean_inter_sep)
-draw_figs(4)
+draw_figs(2)
 # compute_relaxation()
 # leap_frog(2,0.5)
 

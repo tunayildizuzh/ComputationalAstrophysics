@@ -85,7 +85,7 @@ def compute_density_comparison():
     return hernquist_vals,mass_density_vals,particle_count
 
 
-# densities = compute_density_comparison() # Hernquist, Mass, particle count
+densities = compute_density_comparison() # Hernquist, Mass, particle count
 
 
 
